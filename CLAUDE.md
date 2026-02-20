@@ -116,7 +116,8 @@ claude-task-app/
 - [ ] 1-1. Git リポジトリ初期化・`.gitignore` 作成
 - [ ] 1-2. Go モジュール初期化・依存パッケージ導入
 - [ ] 1-3. Docker Compose で PostgreSQL 環境構築
-- [ ] 1-4. Next.js プロジェクト初期化
+- [ ] 1-4. PostgreSQL 接続確認
+- [ ] 1-5. Next.js プロジェクト初期化
 
 ### Phase 2: バックエンド実装（スキーマ駆動開発）
 - [ ] 2-1. OpenAPI スキーマ定義 (`api/openapi.yaml`)
@@ -160,3 +161,7 @@ claude-task-app/
 - APIエンドポイントは `/api/v1/` プレフィックスを付ける
 - エラーハンドリングは適切に行う
 - テストは各層の実装と合わせて書く（実装後にまとめて書かない）
+- 各タスク完了時に `docs/phases/phase{N}/{N}-{M}_{slug}.md` に作業記録を残す
+  - 例: `docs/phases/phase1/1-1_git-init.md`
+- 作業記録を残してからコミットする（記録→コミットの順）
+- タスク1つ完了ごとに1コミットする（例: 1-1 完了→コミット、1-2 完了→コミット）
