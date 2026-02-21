@@ -123,15 +123,16 @@ claude-task-app/
 - [ ] 2-1. OpenAPI スキーマ定義 (`api/openapi.yaml`)
 - [ ] 2-2. oapi-codegen セットアップ・コード生成
 - [ ] 2-3. domain 層実装 (entity, repository IF)
-- [ ] 2-4. DB スキーマ定義 (GORM モデル、マイグレーション)
-- [ ] 2-5. usecase 層実装
-- [ ] 2-6. **usecase 層のユニットテスト** (リポジトリをモックして検証)
-- [ ] 2-7. infrastructure 層実装 (GORM リポジトリ, DB接続)
-- [ ] 2-8. **repository 層の結合テスト** (テスト用DBで実際のCRUDを検証)
-- [ ] 2-9. adapter 層実装 (handler)
-- [ ] 2-10. **handler 層のテスト** (usecase をモックし、HTTPリクエスト/レスポンスを検証)
-- [ ] 2-11. DI・ルーティング結合 (`main.go`)
-- [ ] 2-12. **E2E テスト** (サーバー起動→全エンドポイントを通しで検証)
+- [ ] 2-4. DB スキーマ定義 (Mermaid ER図)
+- [ ] 2-5. GORM モデル・マイグレーション実装
+- [ ] 2-6. usecase 層実装
+- [ ] 2-7. **usecase 層のユニットテスト** (リポジトリをモックして検証)
+- [ ] 2-8. infrastructure 層実装 (GORM リポジトリ, DB接続)
+- [ ] 2-9. **repository 層の結合テスト** (テスト用DBで実際のCRUDを検証)
+- [ ] 2-10. adapter 層実装 (handler)
+- [ ] 2-11. **handler 層のテスト** (usecase をモックし、HTTPリクエスト/レスポンスを検証)
+- [ ] 2-12. DI・ルーティング結合 (`main.go`)
+- [ ] 2-13. **E2E テスト** (サーバー起動→全エンドポイントを通しで検証)
 
 ### Phase 3: フロントエンド実装
 - [ ] 3-1. API クライアント作成
