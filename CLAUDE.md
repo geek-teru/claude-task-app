@@ -100,6 +100,39 @@ claude-task-app/
 | タスク変更 | PUT | `/api/v1/tasks/:id` | タスクを更新 |
 | タスク削除 | DELETE | `/api/v1/tasks/:id` | タスクを削除 |
 
+## DB 設計ルール
+- カラムは原則 NOT NULL 制約を付ける
+- `created_at`, `updated_at` は全テーブル共通。初期値は `CURRENT_TIMESTAMP`
+- `deleted_at` は全テーブル共通。初期値は timestamp 型のゼロ値 (`0001-01-01 00:00:00`)
+- データ削除は**論理削除**方式とし、`deleted_at` を `CURRENT_TIMESTAMP` に更新する
+
+## DB スキーマ (ER図)
+
+```mermaid
+erDiagram
+    users {
+        bigint id PK "AUTO INCREMENT"
+        varchar name "NOT NULL"
+        varchar email "NOT NULL, UNIQUE"
+        timestamp created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
+        timestamp updated_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
+        timestamp deleted_at "NOT NULL, DEFAULT '0001-01-01 00:00:00'"
+    }
+
+    tasks {
+        bigint id PK "AUTO INCREMENT"
+        varchar title "NOT NULL"
+        text description "NOT NULL, DEFAULT ''"
+        varchar status "NOT NULL, DEFAULT 'todo'"
+        bigint user_id FK "NOT NULL"
+        timestamp created_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
+        timestamp updated_at "NOT NULL, DEFAULT CURRENT_TIMESTAMP"
+        timestamp deleted_at "NOT NULL, DEFAULT '0001-01-01 00:00:00'"
+    }
+
+    users ||--o{ tasks : "has many"
+```
+
 ## インフラ構成 (WIP)
 
 | コンポーネント | サービス | 備考 |

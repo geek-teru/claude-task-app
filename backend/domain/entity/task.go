@@ -18,4 +18,5 @@ type Task struct {
 	UserID      int64
 	CreatedAt   time.Time
 	UpdatedAt   time.Time
+	DeletedAt   time.Time
 }
