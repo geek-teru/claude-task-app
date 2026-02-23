@@ -8,7 +8,7 @@ backend/tmp/
 *.dylib
 *.test
 *.out
-backend/gen/
+backend/gen/server.gen.go
 
 # ===== Node.js / Next.js =====
 frontend/node_modules/
