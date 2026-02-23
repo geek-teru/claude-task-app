@@ -24,7 +24,6 @@ type TaskModel struct {
 	CreatedAt   time.Time `gorm:"not null;autoCreateTime"`
 	UpdatedAt   time.Time `gorm:"not null;autoUpdateTime"`
 	DeletedAt   time.Time `gorm:"not null;default:'0001-01-01 00:00:00'"`
-	User        UserModel `gorm:"foreignKey:UserID"`
 }
 
 func (TaskModel) TableName() string {
