@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -30,6 +31,9 @@ func (r *userRepository) FindByID(id int64) (*entity.User, error) {
 	var model UserModel
 	zeroTime := time.Time{}
 	if err := r.db.Where("id = ? AND deleted_at = ?", id, zeroTime).First(&model).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("user not found: %w", entity.ErrNotFound)
+		}
 		return nil, fmt.Errorf("failed to find user: %w", err)
 	}
 	return toUserEntity(&model), nil

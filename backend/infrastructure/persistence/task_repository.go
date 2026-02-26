@@ -1,6 +1,7 @@
 package persistence
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
@@ -43,6 +44,9 @@ func (r *taskRepository) FindByID(id int64) (*entity.Task, error) {
 	var model TaskModel
 	zeroTime := time.Time{}
 	if err := r.db.Where("id = ? AND deleted_at = ?", id, zeroTime).First(&model).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return nil, fmt.Errorf("task not found: %w", entity.ErrNotFound)
+		}
 		return nil, fmt.Errorf("failed to find task: %w", err)
 	}
 	return toTaskEntity(&model), nil

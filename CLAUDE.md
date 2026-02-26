@@ -6,20 +6,20 @@
 
 ## 技術スタック
 
-| カテゴリ                   | 技術                    | 備考                           |
-| -------------------------- | ----------------------- | ------------------------------ |
-| フロントエンド             | Next.js 15 (App Router) | React ベースのフレームワーク   |
-| フロントエンド言語         | TypeScript              |                                |
-| スタイリング               | Tailwind CSS            |                                |
-| パッケージマネージャ       | npm                     |                                |
-| バックエンド言語           | Go                      |                                |
-| バックエンドフレームワーク | Echo                    | 軽量な Web フレームワーク      |
-| ORM                        | GORM                    |                                |
-| データベース               | PostgreSQL              |                                |
-| API スキーマ               | OpenAPI 3.0             | YAML で定義                    |
-| コード生成                 | oapi-codegen            | OpenAPI → Go ハンドラーIF 生成 |
+| カテゴリ                   | 技術                    | 備考                                |
+| -------------------------- | ----------------------- | ----------------------------------- |
+| フロントエンド             | Next.js 15 (App Router) | React ベースのフレームワーク        |
+| フロントエンド言語         | TypeScript              |                                     |
+| スタイリング               | Tailwind CSS            |                                     |
+| パッケージマネージャ       | npm                     |                                     |
+| バックエンド言語           | Go                      |                                     |
+| バックエンドフレームワーク | Echo                    | 軽量な Web フレームワーク           |
+| ORM                        | GORM                    |                                     |
+| データベース               | PostgreSQL              |                                     |
+| API スキーマ               | OpenAPI 3.0             | YAML で定義                         |
+| コード生成                 | oapi-codegen            | OpenAPI → Go ハンドラーIF 生成      |
 | テストライブラリ           | go-testfixtures         | YAML Fixture によるテストデータ投入 |
-| テスト比較                 | go-cmp                  | 構造体の差分比較               |
+| テスト比較                 | go-cmp                  | 構造体の差分比較                    |
 
 ## プロジェクト構造
 
@@ -43,16 +43,20 @@ claude-task-app/
 │   ├── domain/            # Enterprise Business Rules
 │   │   ├── entity/        # エンティティ (ビジネスオブジェクト)
 │   │   └── repository/    # リポジトリインターフェース
+│   │       └── mock/      # リポジトリモック (usecase テスト用)
 │   ├── usecase/           # Application Business Rules
-│   │   └── task/          # タスク関連ユースケース
+│   │   ├── task/          # タスク関連ユースケース
+│   │   │   └── mock/      # タスク usecase モック (handler テスト用)
+│   │   └── user/          # ユーザー関連ユースケース
+│   │       └── mock/      # ユーザー usecase モック (handler テスト用)
 │   ├── adapter/           # Interface Adapters
-│   │   ├── handler/       # Echo ハンドラー (生成IFの実装)
-│   │   └── presenter/     # レスポンス整形
-│   └── infrastructure/    # Frameworks & Drivers
-│       ├── persistence/   # GORM リポジトリ実装
-│       │   └── testdata/  # テスト用 Fixture (YAML)
-│       ├── router/        # Echo ルーティング定義
-│       └── config/        # 設定・環境変数
+│   │   └── handler/       # Echo ハンドラー (生成IFの実装)
+│   ├── infrastructure/    # Frameworks & Drivers
+│   │   ├── persistence/   # GORM リポジトリ実装
+│   │   │   └── testdata/  # テスト用 Fixture (YAML)
+│   │   ├── router/        # Echo ルーティング定義
+│   │   └── config/        # 設定・環境変数
+│   └── e2e/               # E2Eテスト (全層通し)
 ├── docs/                  # ドキュメント
 │   └── phases             # 各フェーズの作業記録
 └── CLAUDE.md
@@ -77,6 +81,11 @@ claude-task-app/
 - エラーは適切にラップして返す
 - `gen/` 配下の自動生成コードは手動で編集しない
 - API変更時は openapi.yaml を先に更新し、oapi-codegen で再生成する
+- **エラーハンドリング戦略**: infrastructure 層で `gorm.ErrRecordNotFound` を `entity.ErrNotFound` でラップして返す。usecase 層は受け取ったエラーをそのまま `fmt.Errorf` でコンテキストを付けてラップして返す。handler 層で `errors.Is(err, entity.ErrNotFound)` により 404 を判断する
+- **センチネルエラーの配置方針**:
+  - usecase 層が参照するセンチネルエラー（ビジネスロジックのエラー）は `domain/entity` で定義・管理する（例: `entity.ErrNotFound`）
+  - HTTP レイヤー固有のセンチネルエラー（バリデーション失敗・不正リクエスト等）は `adapter/handler` で定義・管理する
+- **DELETE の冪等性**: リソース削除は存在確認を行わず常に 204 を返す（冪等操作）
 
 ### バックエンドテスト
 
@@ -188,11 +197,12 @@ erDiagram
 - [ ] 1-5. Next.js プロジェクト初期化
 - [ ] 1-6. コード・CLAUDE.md レビュー
 
-### Phase 2: バックエンド実装（スキーマ駆動開発）
+### Phase 2: バックエンド domain 層実装（スキーマ駆動開発）
 
 - [ ] 2-1. OpenAPI スキーマ定義 (`api/openapi.yaml`)
 - [ ] 2-2. oapi-codegen セットアップ・コード生成
 - [ ] 2-3. domain 層実装 (entity, repository IF)
+- [ ] 2-3. domain 層 センチネルエラー実装 (entity, repository IF)
 - [ ] 2-4. DB スキーマ定義 (Mermaid ER図)
 - [ ] 2-5. GORM モデル・マイグレーション実装
 - [ ] 2-6. infrastructure 層実装 (GORM リポジトリ, DB接続)
@@ -204,15 +214,15 @@ erDiagram
 
 ### Phase 3: バックエンド実装（ロジック・E2Eテスト）
 
-- [ ] 3-1. usecase 層実装
-- [ ] 3-2. usecase 層のテストデータ・モック作成
-- [ ] 3-3. usecase 層のユニットテスト (リポジトリをモックして検証)
-- [ ] 3-4. adapter 層実装 (handler)
-- [ ] 3-5. handler 層のテストデータ・モック作成
-- [ ] 3-6. handler 層のテスト (usecase をモックし、HTTPリクエスト/レスポンスを検証)
-- [ ] 3-7. DI・ルーティング結合 (`main.go`)
-- [ ] 3-8. E2E テスト (サーバー起動→全エンドポイントを通しで検証)
-- [ ] 3-9. コード・CLAUDE.md レビュー
+- [x] 3-1. usecase 層実装
+- [x] 3-2. usecase 層のテストデータ・モック作成
+- [x] 3-3. usecase 層のユニットテスト (リポジトリをモックして検証)
+- [x] 3-4. adapter 層実装 (handler)
+- [x] 3-5. handler 層のテストデータ・モック作成
+- [x] 3-6. handler 層のテスト (usecase をモックし、HTTPリクエスト/レスポンスを検証)
+- [x] 3-7. DI・ルーティング結合 (`main.go`)
+- [x] 3-8. E2E テスト (サーバー起動→全エンドポイントを通しで検証)
+- [x] 3-9. コード・CLAUDE.md レビュー
 
 ### Phase 4: フロントエンド実装
 
