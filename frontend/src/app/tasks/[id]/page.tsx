@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Task } from "@/types";
+import { TASK_STATUS_LABEL, TASK_STATUS_COLOR } from "@/lib/constants";
 import DeleteTaskButton from "@/components/DeleteTaskButton";
 
 type Props = {
@@ -15,21 +16,22 @@ async function fetchTask(id: string): Promise<Task | null> {
   return res.json() as Promise<Task>;
 }
 
-const statusLabel: Record<string, string> = {
-  todo: "未着手",
-  in_progress: "進行中",
-  done: "完了",
-};
-
-const statusColor: Record<string, string> = {
-  todo: "bg-gray-100 text-gray-700",
-  in_progress: "bg-blue-100 text-blue-700",
-  done: "bg-green-100 text-green-700",
-};
-
 export default async function TaskDetailPage({ params }: Props) {
   const { id } = await params;
-  const task = await fetchTask(id);
+
+  let task: Task | null;
+  try {
+    task = await fetchTask(id);
+  } catch {
+    return (
+      <div className="p-6">
+        <p className="text-red-600">タスクの取得に失敗しました。</p>
+        <Link href="/tasks" className="mt-2 inline-block text-sm text-blue-600 hover:underline">
+          ← タスク一覧に戻る
+        </Link>
+      </div>
+    );
+  }
 
   if (!task) notFound();
 
@@ -65,9 +67,9 @@ export default async function TaskDetailPage({ params }: Props) {
           <div>
             <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">ステータス</p>
             <span
-              className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${statusColor[task.status] ?? "bg-gray-100 text-gray-700"}`}
+              className={`mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-medium ${TASK_STATUS_COLOR[task.status] ?? "bg-gray-100 text-gray-700"}`}
             >
-              {statusLabel[task.status] ?? task.status}
+              {TASK_STATUS_LABEL[task.status] ?? task.status}
             </span>
           </div>
 

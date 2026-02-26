@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Task } from "@/types";
+import { TASK_STATUS_LABEL, TASK_STATUS_COLOR } from "@/lib/constants";
 import DeleteTaskButton from "@/components/DeleteTaskButton";
 
 async function fetchTasks(): Promise<Task[]> {
@@ -9,20 +10,18 @@ async function fetchTasks(): Promise<Task[]> {
   return res.json() as Promise<Task[]>;
 }
 
-const statusLabel: Record<string, string> = {
-  todo: "未着手",
-  in_progress: "進行中",
-  done: "完了",
-};
-
-const statusColor: Record<string, string> = {
-  todo: "bg-gray-100 text-gray-700",
-  in_progress: "bg-blue-100 text-blue-700",
-  done: "bg-green-100 text-green-700",
-};
-
 export default async function TaskListPage() {
-  const tasks = await fetchTasks();
+  let tasks: Task[];
+  try {
+    tasks = await fetchTasks();
+  } catch {
+    return (
+      <div className="p-6">
+        <h1 className="text-2xl font-bold mb-6">タスク一覧</h1>
+        <p className="text-red-600">タスクの取得に失敗しました。バックエンドサーバーが起動しているか確認してください。</p>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -47,9 +46,9 @@ export default async function TaskListPage() {
             >
               <div className="flex items-center gap-3">
                 <span
-                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${statusColor[task.status] ?? "bg-gray-100 text-gray-700"}`}
+                  className={`rounded-full px-2 py-0.5 text-xs font-medium ${TASK_STATUS_COLOR[task.status] ?? "bg-gray-100 text-gray-700"}`}
                 >
-                  {statusLabel[task.status] ?? task.status}
+                  {TASK_STATUS_LABEL[task.status] ?? task.status}
                 </span>
                 <Link
                   href={`/tasks/${task.id}`}

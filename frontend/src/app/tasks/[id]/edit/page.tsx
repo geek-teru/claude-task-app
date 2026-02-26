@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Link from "next/link";
 import TaskForm from "@/components/TaskForm";
 import type { Task } from "@/types";
 
@@ -16,7 +17,20 @@ async function fetchTask(id: string): Promise<Task | null> {
 
 export default async function EditTaskPage({ params }: Props) {
   const { id } = await params;
-  const task = await fetchTask(id);
+
+  let task: Task | null;
+  try {
+    task = await fetchTask(id);
+  } catch {
+    return (
+      <div className="p-6">
+        <p className="text-red-600">タスクの取得に失敗しました。</p>
+        <Link href="/tasks" className="mt-2 inline-block text-sm text-blue-600 hover:underline">
+          ← タスク一覧に戻る
+        </Link>
+      </div>
+    );
+  }
 
   if (!task) notFound();
 
